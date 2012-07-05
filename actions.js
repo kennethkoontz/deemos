@@ -12,7 +12,12 @@ var oa = new OAuth(
 
 
 var actions = module.exports = {
-    index: function () {
+    index: function() {
+        this.response.writeHead(200);
+        this.response.write('Index');
+        this.response.end();
+    }
+    twitterAuthenticate: function() {
         self = this;
         req = this.request;
         res = this.response;
@@ -30,5 +35,27 @@ var actions = module.exports = {
                 self.redirect('https://twitter.com/oauth/authenticate?oauth_token='+oauth_token)
             }
         });
+    },
+    twitterCb: function() {
+        self = this;
+        req = this.request;
+        res = this.response;
+        if (req.session.oauth) {
+            req.session.oauth.verifier = req.query.oauth_verifier;
+            var oauth = req.session.oauth;
+            oa.getOAuthAccessToken(oauth.token,oauth.token_secret,oauth.verifier, 
+                function(error, oauth_access_token, oauth_access_token_secret, results){
+                    if (error) {
+                        self.json(error);
+                    } else {
+                        req.session.oauth.access_token = oauth_access_token;
+                        req.session.oauth,access_token_secret = oauth_access_token_secret;
+                        self.json(results);
+                    }
+                }
+            );
+        } else {
+            self.json({msg: 'you are not supposed to be here'});
+        }
     }
 }

@@ -1,3 +1,5 @@
 var routes = module.exports = {
-    '/': 'index'
+    '/': 'index',
+    '/auth/twitter/': 'twitterAuthenticate',
+    '/auth/twitter/callback': 'twitterCb',
 }
