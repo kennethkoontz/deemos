@@ -19,6 +19,9 @@ var actions = module.exports = {
         this.response.write('Index');
         this.response.end();
     },
+    login: function() {
+        this.render('./views/app.html');
+    },
     twitterAuthenticate: function() {
         self = this;
         req = this.request;
