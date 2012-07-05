@@ -8,25 +8,17 @@ var oa = new OAuth(
     "lWc6kG4NPaWYzoKf3M38Ag",
     "at3gb0aWDbzqfIwph8iRnJLGZ37wxwWOLZMRt4Hk",
     "1.0",
-    "http://binaryfootprints.com/auth/twitter/callback",
+    "http://binaryfootprints.com/",
     "HMAC-SHA1"
 );
 
 
 var actions = module.exports = {
-    home: function() {
-        var oauth = sessions.oauth;
-        console.log(oauth);
-        oa.get("https://api.twitter.com/1/statuses/home_timeline.json", oauth.token, oauth.token_secret, function(error, data) {
-            if (error) {
-                self.json(error);
-            } else {
-                self.json(data);
-            }
-        });
-    },
     login: function() {
         this.render('./views/login.html');
+    },
+    home: function() {
+        this.render('./views/deemos.html');
     },
     twitterAuthenticate: function() {
         self = this;
@@ -46,20 +38,24 @@ var actions = module.exports = {
             }
         });
     },
-    twitterCb: function() {
+    aggregate: function() {
         self = this;
         req = this.request;
         res = this.response;
         if (sessions.oauth) {
             var oauth = sessions.oauth;
             oa.getOAuthAccessToken(oauth.token,oauth.token_secret,oauth.verifier, 
-                function(error, oauth_access_token, oauth_access_token_secret, results){
+                function(error, token, secret, results){
                     if (error) {
                         self.json(error);
                     } else {
-                        sessions.oauth.access_token = oauth_access_token;
-                        sessions.oauth,access_token_secret = oauth_access_token_secret;
-                        self.json(results);
+                        oa.get("https://api.twitter.com/1/statuses/home_timeline.json", token, secret, function(error, data) {
+                            if (error) {
+                                self.json(error);
+                            } else {
+                                self.json(data);
+                            }
+                        });
                     }
                 }
             );

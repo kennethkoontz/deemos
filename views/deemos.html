@@ -11,10 +11,12 @@
 		<title>deemos</title>
 	</head>
 	<body ng-controller="StreamCtrl">
-		<ul>
-			<li ng-repeat="message in messages">
-				{{ message }}
-			</li>
-		</ul>
+		<div class="container row" style="margin-top: 20px; min-height:600px;">
+			<ul>
+				<li ng-repeat="message in messages">
+					{{ message.text }} <strong>by</strong> {{ message.user.name }}
+				</li>
+			</ul>
+		</div>
 	</body>
 </html>
