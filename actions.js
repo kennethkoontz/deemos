@@ -1,5 +1,7 @@
 var OAuth= require('oauth').OAuth;
 
+var sessions = {};
+
 var oa = new OAuth(
     "https://api.twitter.com/oauth/request_token",
     "https://api.twitter.com/oauth/access_token",
@@ -26,12 +28,11 @@ var actions = module.exports = {
                 self.json(error);
             }
             else {
-                req.session = {};
-                req.session.oauth = {};
-                req.session.oauth.token = oauth_token;
-                console.log('oauth.token: ' + req.session.oauth.token);
-                req.session.oauth.token_secret = oauth_token_secret;
-                console.log('oauth.token_secret: ' + req.session.oauth.token_secret);
+                sessions.oauth = {};
+                sessions.oauth.token = oauth_token;
+                console.log('oauth.token: ' + sessions.oauth.token);
+                sessions.oauth.token_secret = oauth_token_secret;
+                console.log('oauth.token_secret: ' + sessions.oauth.token_secret);
                 self.redirect('https://twitter.com/oauth/authenticate?oauth_token='+oauth_token)
             }
         });
@@ -40,16 +41,16 @@ var actions = module.exports = {
         self = this;
         req = this.request;
         res = this.response;
-        if (req.session.oauth) {
-            req.session.oauth.verifier = req.query.oauth_verifier;
-            var oauth = req.session.oauth;
+        if (sessions.oauth) {
+            sessions.oauth.verifier = req.query.oauth_verifier;
+            var oauth = sessions.oauth;
             oa.getOAuthAccessToken(oauth.token,oauth.token_secret,oauth.verifier, 
                 function(error, oauth_access_token, oauth_access_token_secret, results){
                     if (error) {
                         self.json(error);
                     } else {
-                        req.session.oauth.access_token = oauth_access_token;
-                        req.session.oauth,access_token_secret = oauth_access_token_secret;
+                        sessions.oauth.access_token = oauth_access_token;
+                        sessions.oauth,access_token_secret = oauth_access_token_secret;
                         self.json(results);
                     }
                 }
