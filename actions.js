@@ -14,13 +14,19 @@ var oa = new OAuth(
 
 
 var actions = module.exports = {
-    index: function() {
-        this.response.writeHead(200);
-        this.response.write('Index');
-        this.response.end();
+    home: function() {
+        var oauth = sessions.oauth;
+        console.log(oauth);
+        oa.get("https://api.twitter.com/1/statuses/home_timeline.json", oauth.token, oauth.token_secret, function(error, data) {
+            if (error) {
+                self.json(error);
+            } else {
+                self.json(data);
+            }
+        });
     },
     login: function() {
-        this.render('./views/app.html');
+        this.render('./views/login.html');
     },
     twitterAuthenticate: function() {
         self = this;
