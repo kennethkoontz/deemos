@@ -16,7 +16,7 @@ var actions = module.exports = {
         this.response.writeHead(200);
         this.response.write('Index');
         this.response.end();
-    }
+    },
     twitterAuthenticate: function() {
         self = this;
         req = this.request;
