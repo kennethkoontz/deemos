@@ -42,7 +42,6 @@ var actions = module.exports = {
         req = this.request;
         res = this.response;
         if (sessions.oauth) {
-            sessions.oauth.verifier = req.query.oauth_verifier;
             var oauth = sessions.oauth;
             oa.getOAuthAccessToken(oauth.token,oauth.token_secret,oauth.verifier, 
                 function(error, oauth_access_token, oauth_access_token_secret, results){
