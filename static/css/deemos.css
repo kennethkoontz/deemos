@@ -1,0 +1,33 @@
+body {
+	background: #455A71;
+}
+
+#bg {
+	padding: 68px 0 50px;
+}
+
+#send-message {
+	border-bottom: 1px solid #E9E9E9;
+	padding-left: 20px;
+	margin-top: 30px;
+}
+
+.row {
+	-webkit-border-radius: 5px;
+	border-radius: 5px; 
+	-webkit-box-shadow: 2px 2px 2px 1px #455A71;
+	box-shadow: 2px 2px 2px 1px #455A71; 
+	background: white;
+}
+
+.message {
+	border-bottom: 1px solid #E9E9E9;
+	padding: 20px;
+	font-size: 14px;
+}
+
+.message-user {
+	font-weight: bold;
+}
+.user {
+}

@@ -14,7 +14,7 @@ var oa = new OAuth(
     "lWc6kG4NPaWYzoKf3M38Ag",
     "at3gb0aWDbzqfIwph8iRnJLGZ37wxwWOLZMRt4Hk",
     "1.0",
-    "http://binaryfootprints.com/auth/twitter/callback",
+    "http://deemos.binaryfootprints.com/auth/twitter/callback",
     "HMAC-SHA1"
 );
 

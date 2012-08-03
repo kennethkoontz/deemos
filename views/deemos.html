@@ -3,7 +3,7 @@
 	<head>
 		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
 		<link href="static/bootstrap/css/bootstrap.css" rel="stylesheet">
-		<link href="static/css/ledger.css" rel="stylesheet">
+		<link href="static/css/deemos.css" rel="stylesheet">
 		<script src="static/lib/jquery-1.7.2.min.js"></script>
 		<script src="static/lib/underscore-min.js"></script>
 		<script src="static/lib/angular-1.0.1.js"></script>
@@ -12,11 +12,20 @@
 	</head>
 	<body ng-controller="StreamCtrl">
 		<div class="container row" style="margin-top: 20px; min-height:600px;">
-			<ul>
-				<li ng-repeat="message in messages">
-					{{ message.text }} <strong>by</strong> {{ message.user.name }}
-				</li>
-			</ul>
+			<div id="send-message">
+				<form class="form-horizontal">
+					<textarea class="input-xlarge" rows="4">What's up?</textarea>
+				</form>
+			</div>
+			<div class="message" ng-repeat="message in messages">
+				<div class="body">
+					{{ message.text }} 
+				</div>
+				<div class="user">
+					<img width="20" height="20" alt="" class="" src="https://si0.twimg.com/a/1343882452/images/resources/twitter-bird-light-bgs.png">
+					<span class="message-user">{{ message.user.name }}</span>
+				</div>
+			</div>
 		</div>
 	</body>
 </html>
