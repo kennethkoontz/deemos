@@ -2,9 +2,42 @@
 <html lang="en" ng-app>
 	<head>
 		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+		<link href="static/bootstrap/css/bootstrap.css" rel="stylesheet">
+		<link href="static/css/deemos.css" rel="stylesheet">
 		<title>deemos</title>
 	</head>
 	<body>
-		<a href="auth/twitter/">login in with twitter</a>
+		<div id="login-box">
+			<div class="container row" style="margin-top: 200px;">
+				<div class="span7 offset3 content">
+					<div class="row">
+						<div class="span5 pad-top">
+							<form class="form-horizontal">
+								<div class="control-group">
+									<label class="control-label" for="input01">email</label>
+									<div class="controls">
+										<input type="text" class="input-large" id="input01">
+									</div>
+								</div>
+								<div class="control-group">
+									<label class="control-label" for="input02">password</label>
+									<div class="controls">
+										<input type="text" class="input-large" id="input02">
+									</div>
+								</div>
+								<div class="control-group">
+									<div class="controls">
+										<input class="btn" type="submit" value="Login">
+									</div>
+								</div>
+							</form>
+						</div>
+						<div class="span2 pad-top">
+							<a href="auth/twitter/">login in with twitter</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	</body>
 </html>

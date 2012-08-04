@@ -65,7 +65,11 @@ var assert = function (exp, message) {
  * cookie object
  */
 var cookieParser = function(cookieString) {
-    assert(typeof cookieString === 'string', 'Object is not a string');
+    try {
+        assert(typeof cookieString === 'string', 'Object is not a string');
+    } catch(err) {
+        return {};
+    }
 
     var cookiesArray = cookieString.split(';'),
         cookiesObject = {},
@@ -79,13 +83,38 @@ var cookieParser = function(cookieString) {
     return cookiesObject;
 }
 
-
 var actions = module.exports = {
     login: function() {
         this.render('./views/login.html');
     },
     home: function() {
-        this.render('./views/deemos.html');
+        if (cookieParser(this.request.headers.cookie).sessionid === undefined) {
+            this.redirect('/login');
+        } else {
+            this.render('./views/deemos.html');
+        }
+    },
+    tweet: function() {
+        var self = this,
+            sessionid = cookieParser(self.request.headers.cookie)['sessionid']; 
+        client.hmget(sessionid, 'accessToken', 'accessSecret', function(error, replies) {
+            if (error) {
+                console.log(error);
+                self.json(error);
+            }
+            console.log(replies[0], replies[1], self.postData, oa)
+            oa.post("https://api.twitter.com/1/statuses/update.json", 
+                replies[0], replies[1], {status: self.postData.body},
+                function(error, data) {
+                    if (error) {
+                        console.log(error);
+                        self.json(error);
+                    }
+                    self.json(data);
+               }
+            );
+        });
+        console.log(self.postData);
     },
     twitterAuthenticate: function() {
         self = this;

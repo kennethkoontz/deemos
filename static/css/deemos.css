@@ -12,12 +12,13 @@ body {
 	margin-top: 30px;
 }
 
-.row {
+.content {
 	-webkit-border-radius: 5px;
 	border-radius: 5px; 
 	-webkit-box-shadow: 2px 2px 2px 1px #455A71;
 	box-shadow: 2px 2px 2px 1px #455A71; 
 	background: white;
+	min-height: 300px;
 }
 
 .message {
@@ -29,5 +30,14 @@ body {
 .message-user {
 	font-weight: bold;
 }
+
 .user {
+}
+
+.pad-top {
+	padding-top: 20px;
+}
+
+.pad-left {
+	padding-left: 20px;
 }

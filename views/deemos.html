@@ -10,20 +10,40 @@
 		<script src="static/app/controllers.js "></script>
 		<title>deemos</title>
 	</head>
-	<body ng-controller="StreamCtrl">
-		<div class="container row" style="margin-top: 20px; min-height:600px;">
-			<div id="send-message">
-				<form class="form-horizontal">
-					<textarea class="input-xlarge" rows="4">What's up?</textarea>
-				</form>
-			</div>
-			<div class="message" ng-repeat="message in messages">
-				<div class="body">
-					{{ message.text }} 
+	<body >
+		<div class="navbar navbar-fixed-top">
+			<div class="navbar-inner">
+				<div class="container">
+					<a class="brand" href="#">deemos</a>
+				<ul class="nav pull-right">
+					<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Account <b class="caret"></b></a>
+					<ul class="dropdown-menu">
+					...
+					</ul>
+					</li>
+					</ul>
 				</div>
-				<div class="user">
-					<img width="20" height="20" alt="" class="" src="https://si0.twimg.com/a/1343882452/images/resources/twitter-bird-light-bgs.png">
-					<span class="message-user">{{ message.user.name }}</span>
+			</div>
+		</div>
+		<div class="container row content" style="margin-top: 20px; min-height:600px;">
+			<div ng-controller="MessageCtrl">
+				<div id="send-message">
+					<form>
+						<textarea class="input-xlarge" ng-model="message.body" rows="4"></textarea>
+						<button ng-click="update(message)" ng-disabled="form.$invalid || isUnchanged(message)">post</button>
+					</form>
+				</div>
+			</div>
+			<div ng-controller="StreamCtrl">
+				<div class="message" ng-repeat="message in messages">
+					<div class="body">
+						{{ message.text }} 
+					</div>
+					<div class="user">
+						<img width="20" height="20" alt="" class="" src="https://si0.twimg.com/a/1343882452/images/resources/twitter-bird-light-bgs.png">
+						<span class="message-user">{{ message.user.name }}</span>
+					</div>
 				</div>
 			</div>
 		</div>
