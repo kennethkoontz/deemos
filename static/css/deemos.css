@@ -23,12 +23,21 @@ body {
 
 .message {
 	border-bottom: 1px solid #E9E9E9;
-	padding: 20px;
-	font-size: 14px;
+	font-size: 12px;
+}
+
+.avatar {
+	border-right: 1px solid #E9E9E9;
 }
 
 .message-user {
-	font-weight: bold;
+	font-size: 10px;
+	font-color: #E9E9E9;
+	padding-left: 22px;
+}
+
+.message-created {
+	font-size: 10px;
 }
 
 .user {
@@ -36,6 +45,13 @@ body {
 
 .pad-top {
 	padding-top: 20px;
+}
+
+.pad-top-small {
+	padding-top: 4px;
+}
+.pad-top-medium {
+	padding-top: 10px;
 }
 
 .pad-left {

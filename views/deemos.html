@@ -19,7 +19,8 @@
 					<li class="dropdown">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Account <b class="caret"></b></a>
 					<ul class="dropdown-menu">
-					...
+					<li>twitter</li>
+					<li>facebook</li>
 					</ul>
 					</li>
 					</ul>
@@ -36,13 +37,22 @@
 				</div>
 			</div>
 			<div ng-controller="StreamCtrl">
-				<div class="message" ng-repeat="message in messages">
-					<div class="body">
-						{{ message.text }} 
-					</div>
-					<div class="user">
-						<img width="20" height="20" alt="" class="" src="https://si0.twimg.com/a/1343882452/images/resources/twitter-bird-light-bgs.png">
-						<span class="message-user">{{ message.user.name }}</span>
+				<div class="message" ng-repeat="message in messages | orderBy:'created_on':'reverse'">
+					<div class="row pad-top-small">
+						<div class="row" style="min-height: 80px;">
+							<div class="span2 avatar">
+								<img width="60" height="60" alt="" src="{{ message.user.profile_image_url || 'https://graph.facebook.com/'+message.from.id+'/picture' }}" >
+								<img width="60" ng-show="message.twitter" height="60" alt="" class="pull-right" src="https://si0.twimg.com/a/1343882452/images/resources/twitter-bird-light-bgs.png">
+								<img width="60" ng-show="message.facebook" height="60" alt="" class="pull-right" src="/static/img/facebook-logo.jpg">
+								<span class="message-user">{{ message.user.name || message.from.name }}</span>
+							</div>
+							<div class="span10">
+								<div class="body">
+									<span class="pull-right message-created">{{ message.time_ago }}</span>
+									<span class="message-text">{{ message.text || message.message || message.story || message.link}}</span>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>

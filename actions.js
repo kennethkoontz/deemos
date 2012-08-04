@@ -1,7 +1,10 @@
 var crypto = require('crypto'),
     qs = require('querystring'),
+    url = require('url'),
     redis = require("redis"),
     client = redis.createClient(),
+    request = require('request'),
+    moment = require('moment'),
     OAuth = require('oauth').OAuth;
 
     client.on("error", function(error) {
@@ -17,6 +20,17 @@ var oa = new OAuth(
     "http://deemos.binaryfootprints.com/auth/twitter/callback",
     "HMAC-SHA1"
 );
+
+var fb = {
+    base: "https://www.facebook.com/",
+    graph: "https://graph.facebook.com/",
+    auth: "dialog/oauth",
+    accessToken: "oauth/access_token",
+    redirect: "http://deemos.binaryfootprints.com/auth/facebook/callback",
+    accessRedirect: "http://deemos.binaryfootprints.com/",
+    clientId: "450449624976739",
+    appSecret: "e856fdd60f0149e0ecc257914590c1e1"
+};
 
 var generateString = function() {
     var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
@@ -83,6 +97,15 @@ var cookieParser = function(cookieString) {
     return cookiesObject;
 }
 
+var mergeSort = function(array, comparison) {
+    if(array.length < 2)
+                return array;
+    var middle = Math.ceil(array.length/2);
+    return merge(merge_sort(array.slice(0,middle),comparison),
+                 merge_sort(array.slice(middle),comparison),
+                 comparison);
+}
+
 var actions = module.exports = {
     login: function() {
         this.render('./views/login.html');
@@ -97,7 +120,7 @@ var actions = module.exports = {
     tweet: function() {
         var self = this,
             sessionid = cookieParser(self.request.headers.cookie)['sessionid']; 
-        client.hmget(sessionid, 'accessToken', 'accessSecret', function(error, replies) {
+        client.hmget(sessionid, 'twitter-accessToken', 'twitter-accessSecret', function(error, replies) {
             if (error) {
                 console.log(error);
                 self.json(error);
@@ -126,46 +149,88 @@ var actions = module.exports = {
                 if (error) {
                     self.json(error);
                 } else {
-                    client.hmset(sessionid, 'oauthToken', oauth_token, 'oauthTokenSecret', oauth_token_secret, redis.print);
+                    client.hmset(sessionid, 'twitter-oauthToken', oauth_token, 'twitter-oauthTokenSecret', oauth_token_secret, redis.print);
                     self.response.setHeader("Set-Cookie", ["sessionid="+sessionid+";Path=/"]);
                     self.redirect('https://twitter.com/oauth/authenticate?oauth_token='+oauth_token)
                 }
             }
         );
     },
+    facebookAuthenticate: function() {
+        this.redirect(fb.base+fb.auth+'?client_id='+fb.clientId+'&redirect_uri='+fb.redirect+'&scope=read_stream');
+    },
+    facebookCallback: function() {
+        var self = this,
+            urlString = this.request.url,
+            code = qs.parse(url.parse(urlString).query).code,
+            sessionid = cookieParser(self.request.headers.cookie)['sessionid'],
+            accessUrl = fb.graph+fb.accessToken+'?client_id='+fb.clientId+'&redirect_uri='+fb.redirect+
+                        '&client_secret='+fb.appSecret+'&code='+code;
+
+        request(accessUrl, function(error, response, body) {
+            if (error) {
+                self.json(error);
+            } else {
+                client.hmset(sessionid, 'fb-accessToken', qs.parse(body).access_token, redis.print);
+                self.redirect('http://deemos.binaryfootprints.com/');
+            }
+        });
+    },
     twitterCallback: function() {
         var self = this,
             verifier = qs.parse(self.request.headers.referer).oauth_verifier,
             sessionid = cookieParser(self.request.headers.cookie)['sessionid']; 
-        client.hmget(sessionid, 'oauthToken', 'oauthTokenSecret', function(error, replies) {
-            console.log(replies);
+
+        client.hmget(sessionid, 'twitter-oauthToken', 'twitter-oauthTokenSecret', function(error, replies) {
             oa.getOAuthAccessToken(replies[0], replies[1], verifier, function(error, accessToken, accessSecret, results) {
                 if (error) {
                     console.log(error);
                     self.json(error);
                 }
-                client.hmset(sessionid, 'accessToken', accessToken, 'accessSecret', accessSecret, redis.print);
+                client.hmset(sessionid, 'twitter-accessToken', accessToken, 'twitter-accessSecret', accessSecret, redis.print);
                 self.redirect('/');
             });
         });
     },
     aggregate: function() {
         var self = this,
-            sessionid = cookieParser(self.request.headers.cookie)['sessionid']; 
+            sessionid = cookieParser(self.request.headers.cookie)['sessionid'],
+            stream = {unsorted: []};
 
-        client.hmget(sessionid, 'accessToken', 'accessSecret', function(error, replies) {
+        client.hmget(sessionid, 'twitter-accessToken', 'twitter-accessSecret', 'fb-accessToken', function(error, replies) {
             if (error) {
                 console.log(error);
                 self.json(error);
             }
 
-            oa.get("https://api.twitter.com/1/statuses/home_timeline.json", replies[0], replies[1], function(error, data) {
+            oa.get("https://api.twitter.com/1/statuses/home_timeline.json", replies[0], replies[1], function(error, twitter) {
                 if (error) {
                     console.log(error);
                     self.json(error);
                 }
-                self.json(data);
+                request("https://graph.facebook.com/me/home?access_token="+replies[2], function(error, response, fb) {
+                    if (error) {
+                        console.log(error);
+                    } else {
+                        stream['twitter'] = JSON.parse(twitter) || [];
+                        stream['fb'] = JSON.parse(fb).data || [];
+                    }
+                    for (x in stream.twitter) {
+                        stream.twitter[x]['twitter'] = true;
+                        stream.twitter[x]['created_on'] = new Date(stream.twitter[x].created_at);
+                        stream.twitter[x]['time_ago'] = moment(stream.twitter[x].created_at).fromNow();
+                        stream.unsorted.push(stream.twitter[x]);
+                    }
+                    for (x in stream.fb) {
+                        stream.fb[x]['facebook'] = true;
+                        stream.fb[x]['created_on'] = new Date(stream.fb[x].created_time);
+                        stream.fb[x]['time_ago'] = moment(stream.fb[x].created_time).fromNow();
+                        stream.unsorted.push(stream.fb[x]);
+                    }
+                    self.json(stream.unsorted);
+                });
             });
+
         });
     }
 }
