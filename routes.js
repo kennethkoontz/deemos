@@ -1,5 +1,8 @@
 var routes = module.exports = {
     '/': 'home',
+    '/register': 'register',
+    '/register/email': 'registerEmail',
+    '/checkEmail': 'checkEmail',
     '/login': 'login',
     '/tweet': 'tweet',
     '/auth/twitter/': 'twitterAuthenticate',

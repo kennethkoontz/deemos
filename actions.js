@@ -32,6 +32,10 @@ var fb = {
     appSecret: "e856fdd60f0149e0ecc257914590c1e1"
 };
 
+var couch = {
+    base: 'http://localhost:5984/'
+};
+
 var generateString = function() {
     var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
     var stringLength = 8;
@@ -97,24 +101,17 @@ var cookieParser = function(cookieString) {
     return cookiesObject;
 }
 
-var mergeSort = function(array, comparison) {
-    if(array.length < 2)
-                return array;
-    var middle = Math.ceil(array.length/2);
-    return merge(merge_sort(array.slice(0,middle),comparison),
-                 merge_sort(array.slice(middle),comparison),
-                 comparison);
-}
-
 var actions = module.exports = {
     login: function() {
         this.render('./views/login.html');
     },
     home: function() {
-        if (cookieParser(this.request.headers.cookie).sessionid === undefined) {
-            this.redirect('/login');
-        } else {
+        if (cookieParser(this.request.headers.cookie).session) {
             this.render('./views/deemos.html');
+        } else if (cookieParser(this.request.headers.cookie).sessionid) {
+            this.render('./views/deemos.html');
+        } else {
+            this.redirect('/login');
         }
     },
     tweet: function() {
@@ -155,6 +152,35 @@ var actions = module.exports = {
                 }
             }
         );
+    },
+    register: function() {
+        this.render('./views/register.html');
+    },
+    registerEmail: function() {
+        var self = this,
+            session = generateCookie();
+
+        request.post({url: couch.base+'users', json: self.postData}, function(error, response, body) {
+            if (error) {
+                self.json(error);
+            } else {
+                client.sadd('sessions', session, redis.print);
+                self.response.setHeader("Set-Cookie", ["session="+session+";Path=/"]);
+                self.redirect('/');
+            }
+        });
+    },
+    checkEmail: function() {
+        var self = this,
+            email = qs.parse(url.parse(self.request.url).query).email;
+
+        request(couch.base+'users/_design/user_email/_view/by_email?key="'+email+'"', function(error, response, body) {
+            if (error) {
+                self.json(error);
+            } else {
+                self.json(body);
+            }
+        });
     },
     facebookAuthenticate: function() {
         this.redirect(fb.base+fb.auth+'?client_id='+fb.clientId+'&redirect_uri='+fb.redirect+'&scope=read_stream');

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="register">
+	<head>
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+		<script src="static/lib/angular-1.0.1.js"></script>
+		<script src="static/lib/angular-ui.js"></script>
+		<script src="static/app/controllers.js "></script>
+		<script src="static/app/app.js "></script>
+		<link href="static/bootstrap/css/bootstrap.css" rel="stylesheet">
+		<link href="static/lib/angular-ui.css" rel="stylesheet">
+		<link href="static/css/deemos.css" rel="stylesheet">
+		<title>deemos</title>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row space-medium">
+			</div> 
+			<div class="row">
+				<div class="span8 offset2 content">
+					<h1>register</h1>
+					<form name="register" ng-controller="RegisterCtrl" class="form-horizontal">
+						<div ng-class="{success: emailAvailable, error: emailNotAvailable}" class="control-group">
+							<label class="control-label" for="email">email</label>
+							<div class="controls">
+								<input name="email" type="email" class="input-large" id="email" ng-model="email" ui-event="{ blur : 'checkEmail()' }" required>
+								<span class="help-inline" ng-show="emailAvailable">available</span>
+								<span class="help-inline" ng-show="emailNotAvailable">not available</span>
+							</div>
+						</div>
+						<div ng-class="{success: register.password.$valid}" class="control-group">
+							<label class="control-label" for="input02">password</label>
+							<div class="controls">
+								 <input name="password" ng-model="password" type="password" class="input-large" id="password" required>
+							</div>
+						</div>
+						<div class="control-group">
+							<div class="controls">
+								<input class="btn" type="submit" value="register" ng-disabled="register.$invalid" ng-click="registerEmail()">
+							</div>
+						</div>
+						<tt>register.email.$valid = {{register.email.$valid}}</tt><br>
+						<tt>register.password.$valid = {{register.password.$valid}}</tt><br>
+						<tt>register.input.$error = {{register.input.$error}}</tt><br>
+						<tt>register.$valid = {{register.$valid}}</tt><br>
+						<tt>register.$error.REQUIRED = {{!!register.$error.REQUIRED}}</tt><br>
+					</form>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

@@ -24,3 +24,33 @@ var MessageCtrl = function($scope, $http) {
 
     $scope.reset();
 };
+
+var RegisterCtrl = function($scope, $http, $location) {
+
+    $scope.checkEmail = function() {
+        var query = 'checkEmail?email='+$scope.email;
+
+        if ($scope.email) {
+            $http.get(query).success(function(data) {
+                if (data.rows.length === 0) {
+                    $scope.emailAvailable = true;
+                    $scope.emailNotAvailable = false;
+                } else {
+                    $scope.emailAvailable = false;
+                    $scope.emailNotAvailable = true;
+                }
+            });
+        }
+    }
+
+    $scope.registerEmail = function() {
+        $http.post('register/email', {email:$scope.email, password:$scope.password}).success(function(data) {
+            window.location = '../';
+        });
+    }
+
+}
+
+function Ctrl($scope) {
+      $scope.userType = '';
+}
