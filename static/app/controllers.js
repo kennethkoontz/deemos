@@ -25,7 +25,16 @@ var MessageCtrl = function($scope, $http) {
     $scope.reset();
 };
 
-var RegisterCtrl = function($scope, $http, $location) {
+var LoginCtrl = function($scope, $http) {
+    $scope.login = function() {
+        console.log('in controller');
+        $http.get('login/submit?email='+$scope.email+'&password='+$scope.password).success(function(data) {
+            window.location = '../';
+        });
+    }
+};
+
+var RegisterCtrl = function($scope, $http) {
 
     $scope.checkEmail = function() {
         var query = 'checkEmail?email='+$scope.email;

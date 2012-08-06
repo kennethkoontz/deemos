@@ -2,39 +2,38 @@
 <html lang="en" ng-app>
 	<head>
 		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+		<script src="static/lib/angular-1.0.1.js"></script>
+		<script src="static/app/controllers.js "></script>
 		<link href="static/bootstrap/css/bootstrap.css" rel="stylesheet">
 		<link href="static/css/deemos.css" rel="stylesheet">
-		<title>deemos</title>
+		<title>deemos - login</title>
 	</head>
 	<body>
 		<div id="login-box">
 			<div class="container row" style="margin-top: 200px;">
 				<div class="span7 offset3 content">
+					<h1>login</h1>
 					<div class="row">
 						<div class="span5 pad-top">
-							<form class="form-horizontal">
+							<form name="loginForm" class="form-horizontal" ng-controller="LoginCtrl">
 								<div class="control-group">
-									<label class="control-label" for="input01">email</label>
+									<label class="control-label" for="email" >email</label>
 									<div class="controls">
-										<input type="text" class="input-large" id="input01">
+										<input type="text" class="input-large" id="email" ng-model="email">
 									</div>
 								</div>
 								<div class="control-group">
-									<label class="control-label" for="input02">password</label>
+									<label class="control-label" for="password">password</label>
 									<div class="controls">
-										<input type="text" class="input-large" id="input02">
+										<input type="text" class="input-large" id="password" ng-model="password">
 									</div>
 								</div>
 								<div class="control-group">
 									<div class="controls">
-										<input class="btn" type="submit" value="Login">
+										<input class="btn" type="submit" value="Login" ng-click="login()">
 									</div>
 								</div>
 							</form>
-						</div>
-						<div class="span2 pad-top">
-							<p><a href="auth/twitter/">login in with twitter</a></p>
-							<p><a href="auth/facebook/">login in with facebook</a></p>
 						</div>
 					</div>
 				</div>

@@ -105,6 +105,26 @@ var actions = module.exports = {
     login: function() {
         this.render('./views/login.html');
     },
+    loginSubmit: function() {
+        var self = this,
+            email = qs.parse(url.parse(self.request.url).query).email,
+            password = qs.parse(url.parse(self.request.url).query).password,
+            session = generateCookie();
+
+        request(couch.base+'users/_design/user_email/_view/by_email?key="'+email+'"', function(error, response, body) {
+            var doc = JSON.parse(body).rows[0];
+            console.log(doc);
+            if (error) {
+                self.json(error);
+            } else if (doc.length === 0) {
+                self.json({});
+            } else if (password === doc.value.password && email === doc.value.email) {
+                client.sadd('sessions', session, redis.print);
+                self.response.setHeader("Set-Cookie", ["session="+session+";Path=/"]);
+                self.redirect('/');
+            }
+        });
+    },
     home: function() {
         if (cookieParser(this.request.headers.cookie).session) {
             this.render('./views/deemos.html');

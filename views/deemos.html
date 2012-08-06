@@ -5,6 +5,7 @@
 		<link href="static/bootstrap/css/bootstrap.css" rel="stylesheet">
 		<link href="static/css/deemos.css" rel="stylesheet">
 		<script src="static/lib/jquery-1.7.2.min.js"></script>
+		<script src="static/bootstrap/js/bootstrap.js "></script>
 		<script src="static/lib/underscore-min.js"></script>
 		<script src="static/lib/angular-1.0.1.js"></script>
 		<script src="static/app/controllers.js "></script>
@@ -17,12 +18,12 @@
 					<a class="brand" href="#">deemos</a>
 				<ul class="nav pull-right">
 					<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Account <b class="caret"></b></a>
-					<ul class="dropdown-menu">
-					<li>twitter</li>
-					<li>facebook</li>
-					</ul>
-					</li>
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#">feeds<b class="caret"></b></a>
+						<ul class="dropdown-menu">
+						<li><a href="auth/twitter/">add twitter feed</a></li>
+						<li><a href="auth/facebook/">add facebook feed</a></li>
+						<li class="divider"></li>
+						<li><a href="#">add rss feed (coming soon...)</a></li>
 					</ul>
 				</div>
 			</div>
