@@ -185,33 +185,34 @@ var actions = module.exports = {
         );
     },
     register: function() {
-        this.render('./views/register.html');
-    },
-    registerEmail: function() {
         var self = this,
-            session = generateCookie();
+            isAjax = true ? this.request['headers']['x-requested-with'] : false;
 
-        request.post({url: couch.base+'users', json: self.postData}, function(error, response, body) {
-            if (error) {
-                self.json(error);
-            } else {
+        if (isAjax && this.request.method === 'POST') {
+            var session = generateCookie();
+            
+            user.on('registrationSuccess', function() {
                 client.sadd('sessions', session, redis.print);
                 self.response.setHeader("Set-Cookie", ["session="+session+";Path=/"]);
                 self.redirect('/');
-            }
-        });
-    },
-    checkEmail: function() {
-        var self = this,
-            email = qs.parse(url.parse(self.request.url).query).email;
+            });
+            user.on('registrationError', function() {
+                self.statusCode(404);
+            });
+            user.register(self.postData);
+        } else if (isAjax && this.request.method === 'GET') {
+            var email = qs.parse(url.parse(self.request.url).query).email;
 
-        request(couch.base+'users/_design/user_email/_view/by_email?key="'+email+'"', function(error, response, body) {
-            if (error) {
-                self.json(error);
-            } else {
-                self.json(body);
-            }
-        });
+            user.on('emailAvailable', function() {
+                self.statusCode(200);
+            });
+            user.on('emailNotAvailable', function() {
+                self.statusCode(404);
+            });
+            user.checkEmail(email);
+        } else {
+            this.render('./views/register.html');
+        }
     },
     facebookAuthenticate: function() {
         this.redirect(fb.base+fb.auth+'?client_id='+fb.clientId+'&redirect_uri='+fb.redirect+'&scope=read_stream');
@@ -241,7 +242,6 @@ var actions = module.exports = {
         client.hmget(sessionid, 'twitter-oauthToken', 'twitter-oauthTokenSecret', function(error, replies) {
             oa.getOAuthAccessToken(replies[0], replies[1], verifier, function(error, accessToken, accessSecret, results) {
                 if (error) {
-                    console.log(error);
                     self.json(error);
                 }
                 client.hmset(sessionid, 'twitter-accessToken', accessToken, 'twitter-accessSecret', accessSecret, redis.print);
@@ -256,7 +256,6 @@ var actions = module.exports = {
         if (sessionid) {
             client.hmget(sessionid, 'twitter-accessToken', 'twitter-accessSecret', 'fb-accessToken', function(error, replies) {
                 if (error) {
-                    console.log(error);
                     self.json(error);
                 }
 

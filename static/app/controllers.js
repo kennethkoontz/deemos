@@ -45,23 +45,25 @@ var LoginCtrl = function($scope, $http) {
 var RegisterCtrl = function($scope, $http) {
 
     $scope.checkEmail = function() {
-        var query = 'checkEmail?email='+$scope.email;
+        var query = 'register?email='+$scope.email;
 
+        // Only perform an email lookup if there is a valid email address in
+        // the form.
         if ($scope.email) {
-            $http.get(query).success(function(data) {
-                if (data.rows.length === 0) {
+            $http.get(query).
+                success(function() {
                     $scope.emailAvailable = true;
                     $scope.emailNotAvailable = false;
-                } else {
+                }).
+                error(function() {
                     $scope.emailAvailable = false;
                     $scope.emailNotAvailable = true;
-                }
-            });
+                });
         }
     }
 
     $scope.registerEmail = function() {
-        $http.post('register/email', {email:$scope.email, password:$scope.password}).success(function(data) {
+        $http.post('register', {email:$scope.email, password:$scope.password}).success(function(data) {
             window.location = '../';
         });
     }

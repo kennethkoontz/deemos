@@ -15,8 +15,32 @@ var couch = {
 var User = function() {
     events.EventEmitter.call(this);
 
-    this.register = function(email, password) {
-           
+    this.register = function(user) {
+        var self = this;
+
+        request.post({url: couch.base+'users', json: user}, function(error, response, body) {
+            if (error) {
+                self.emit('registrationError');
+            } else {
+                self.emit('registrationSuccess');
+            }
+        });
+    };
+
+    this.checkEmail = function(email) {
+        var self = this;
+
+        request(couch.base+'users/_design/user_email/_view/by_email?key="'+email+'"', function(error, response, body) {
+            if (error) {
+                self.emit('emailNotAvailable');
+            } else {
+                if (JSON.parse(body).rows.length === 1) {
+                    self.emit('emailNotAvailable');
+                } else {
+                    self.emit('emailAvailable');
+                }
+            }
+        });
     };
 
     this.login = function(email, password) {
@@ -41,6 +65,7 @@ var User = function() {
             }
         });
     };
+
 };
 
 util.inherits(User, events.EventEmitter);

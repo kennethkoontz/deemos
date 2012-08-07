@@ -35,7 +35,7 @@
 						</div>
 						<div class="control-group">
 							<div class="controls">
-								<input class="btn" type="submit" value="register" ng-disabled="register.$invalid" ng-click="registerEmail()">
+								<input class="btn" type="submit" value="register" ng-disabled="register.$invalid || emailNotAvailable" ng-click="registerEmail()">
 							</div>
 						</div>
 					</form>
