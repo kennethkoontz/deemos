@@ -5,6 +5,7 @@ var routes = module.exports = {
     '/checkEmail': 'checkEmail',
     '/login': 'login',
     '/login/submit': 'loginSubmit',
+    '/logout': 'logout',
     '/tweet': 'tweet',
     '/auth/twitter/': 'twitterAuthenticate',
     '/auth/facebook/': 'facebookAuthenticate',

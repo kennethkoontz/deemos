@@ -5,7 +5,8 @@ var crypto = require('crypto'),
     client = redis.createClient(),
     request = require('request'),
     moment = require('moment'),
-    OAuth = require('oauth').OAuth;
+    OAuth = require('oauth').OAuth,
+    user = require('./user');
 
     client.on("error", function(error) {
         console.log("Error: " + err);
@@ -107,31 +108,41 @@ var actions = module.exports = {
     },
     loginSubmit: function() {
         var self = this,
-            email = qs.parse(url.parse(self.request.url).query).email,
-            password = qs.parse(url.parse(self.request.url).query).password,
             session = generateCookie();
 
-        request(couch.base+'users/_design/user_email/_view/by_email?key="'+email+'"', function(error, response, body) {
-            var doc = JSON.parse(body).rows[0];
-            console.log(doc);
-            if (error) {
-                self.json(error);
-            } else if (doc.length === 0) {
-                self.json({});
-            } else if (password === doc.value.password && email === doc.value.email) {
-                client.sadd('sessions', session, redis.print);
-                self.response.setHeader("Set-Cookie", ["session="+session+";Path=/"]);
-                self.redirect('/');
-            }
+        user.on('loginValid', function(data) {
+            client.sadd('sessions', session, redis.print);
+            self.response.writeHead(200, {"Set-Cookie": "session="+session+";Path=/"});
+            self.response.end();
+        });
+        user.on('loginInvalid', function(data) {
+            self.statusCode(404);
+        });
+        user.login(self.postData.email, self.postData.password);
+    },
+    logout: function() {
+        var self = this,
+            session = cookieParser(this.request.headers.cookie)['session'];
+
+        client.spop(session, function() {
+            self.response.setHeader("Set-Cookie", ["session="+session+";expires="+new Date(1)+";Path=/"]);
+            self.redirect('/');
         });
     },
     home: function() {
-        if (cookieParser(this.request.headers.cookie).session) {
-            this.render('./views/deemos.html');
-        } else if (cookieParser(this.request.headers.cookie).sessionid) {
-            this.render('./views/deemos.html');
+        var self = this,
+            session = cookieParser(this.request.headers.cookie).session;
+
+        if (session) {
+            client.sismember('sessions', session, function(error, data) {
+                if (data === 1) {
+                    self.render('./views/deemos.html');
+                } else {
+                    self.redirect('/login');
+                }
+            });
         } else {
-            this.redirect('/login');
+            self.redirect('/login');
         }
     },
     tweet: function() {
@@ -242,41 +253,44 @@ var actions = module.exports = {
         var self = this,
             sessionid = cookieParser(self.request.headers.cookie)['sessionid'],
             stream = {unsorted: []};
-
-        client.hmget(sessionid, 'twitter-accessToken', 'twitter-accessSecret', 'fb-accessToken', function(error, replies) {
-            if (error) {
-                console.log(error);
-                self.json(error);
-            }
-
-            oa.get("https://api.twitter.com/1/statuses/home_timeline.json", replies[0], replies[1], function(error, twitter) {
+        if (sessionid) {
+            client.hmget(sessionid, 'twitter-accessToken', 'twitter-accessSecret', 'fb-accessToken', function(error, replies) {
                 if (error) {
                     console.log(error);
                     self.json(error);
                 }
-                request("https://graph.facebook.com/me/home?access_token="+replies[2], function(error, response, fb) {
+
+                oa.get("https://api.twitter.com/1/statuses/home_timeline.json", replies[0], replies[1], function(error, twitter) {
                     if (error) {
                         console.log(error);
-                    } else {
-                        stream['twitter'] = JSON.parse(twitter) || [];
-                        stream['fb'] = JSON.parse(fb).data || [];
+                        self.json(error);
                     }
-                    for (x in stream.twitter) {
-                        stream.twitter[x]['twitter'] = true;
-                        stream.twitter[x]['created_on'] = new Date(stream.twitter[x].created_at);
-                        stream.twitter[x]['time_ago'] = moment(stream.twitter[x].created_at).fromNow();
-                        stream.unsorted.push(stream.twitter[x]);
-                    }
-                    for (x in stream.fb) {
-                        stream.fb[x]['facebook'] = true;
-                        stream.fb[x]['created_on'] = new Date(stream.fb[x].created_time);
-                        stream.fb[x]['time_ago'] = moment(stream.fb[x].created_time).fromNow();
-                        stream.unsorted.push(stream.fb[x]);
-                    }
-                    self.json(stream.unsorted);
+                    request("https://graph.facebook.com/me/home?access_token="+replies[2], function(error, response, fb) {
+                        if (error) {
+                            console.log(error);
+                        } else {
+                            stream['twitter'] = JSON.parse(twitter) || [];
+                            stream['fb'] = JSON.parse(fb).data || [];
+                        }
+                        for (x in stream.twitter) {
+                            stream.twitter[x]['twitter'] = true;
+                            stream.twitter[x]['created_on'] = new Date(stream.twitter[x].created_at);
+                            stream.twitter[x]['time_ago'] = moment(stream.twitter[x].created_at).fromNow();
+                            stream.unsorted.push(stream.twitter[x]);
+                        }
+                        for (x in stream.fb) {
+                            stream.fb[x]['facebook'] = true;
+                            stream.fb[x]['created_on'] = new Date(stream.fb[x].created_time);
+                            stream.fb[x]['time_ago'] = moment(stream.fb[x].created_time).fromNow();
+                            stream.unsorted.push(stream.fb[x]);
+                        }
+                        self.json(stream.unsorted);
+                    });
                 });
-            });
 
-        });
+            });
+        } else {
+            self.json({});
+        }
     }
 }

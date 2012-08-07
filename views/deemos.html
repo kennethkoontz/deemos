@@ -1,13 +1,17 @@
 <!DOCTYPE html>
-<html lang="en" ng-app>
+<html lang="en" ng-app="deemos">
 	<head>
 		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
 		<link href="static/bootstrap/css/bootstrap.css" rel="stylesheet">
 		<link href="static/css/deemos.css" rel="stylesheet">
+		<link href="static/lib/angular-ui.css" rel="stylesheet">
 		<script src="static/lib/jquery-1.7.2.min.js"></script>
 		<script src="static/bootstrap/js/bootstrap.js "></script>
 		<script src="static/lib/underscore-min.js"></script>
 		<script src="static/lib/angular-1.0.1.js"></script>
+		<script src="static/lib/angular-ui.js"></script>
+		<script src="static/lib/angular-cookies-1.0.1.js"></script>
+		<script src="static/app/app.js "></script>
 		<script src="static/app/controllers.js "></script>
 		<title>deemos</title>
 	</head>
@@ -18,17 +22,19 @@
 					<a class="brand" href="#">deemos</a>
 				<ul class="nav pull-right">
 					<li class="dropdown">
-					<a class="dropdown-toggle" data-toggle="dropdown" href="#">feeds<b class="caret"></b></a>
+					<a id="feed" class="dropdown-toggle" data-toggle="dropdown" href="#">feeds<b class="caret"></b></a>
 						<ul class="dropdown-menu">
 						<li><a href="auth/twitter/">add twitter feed</a></li>
 						<li><a href="auth/facebook/">add facebook feed</a></li>
 						<li class="divider"></li>
 						<li><a href="#">add rss feed (coming soon...)</a></li>
 					</ul>
+					<li class="divider-vertical"></li>
+					<li><a href="logout">logout</a></li>
 				</div>
 			</div>
 		</div>
-		<div class="container row content" style="margin-top: 20px; min-height:600px;">
+		<div id="stream" class="container row" style="margin-top: 20px; min-height:600px;">
 			<div ng-controller="MessageCtrl">
 				<div id="send-message">
 					<form>
@@ -38,6 +44,9 @@
 				</div>
 			</div>
 			<div ng-controller="StreamCtrl">
+				<div ng-hide="hasFeed" class="alert alert-info">
+					your stream is empty. add a feed.
+				</div>
 				<div class="message" ng-repeat="message in messages | orderBy:'created_on':'reverse'">
 					<div class="row pad-top-small">
 						<div class="row" style="min-height: 80px;">

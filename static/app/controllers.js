@@ -1,8 +1,12 @@
-var StreamCtrl = function($scope, $http) {
-    
-    $http.get('aggregate').success(function(data) {
-        $scope.messages = data;
-    });
+var StreamCtrl = function($scope, $http, $cookies) {
+    if ($cookies.session !== undefined) {
+        $scope.hasFeed = true;
+        $http.get('aggregate').success(function(data) {
+            if (angular.isObject(data) && !angular.equals({}, data)) {
+                $scope.messages = data;
+            }
+        });
+    }
 };
 
 var MessageCtrl = function($scope, $http) {
@@ -27,10 +31,14 @@ var MessageCtrl = function($scope, $http) {
 
 var LoginCtrl = function($scope, $http) {
     $scope.login = function() {
-        console.log('in controller');
-        $http.get('login/submit?email='+$scope.email+'&password='+$scope.password).success(function(data) {
-            window.location = '../';
-        });
+        var data = {email: $scope.email, password: $scope.password};
+        $http.post('login/submit', data).
+            success(function(data) {
+                window.location = '../';
+            }).
+            error(function(data) {
+                $scope.invalidLogin = true;
+            });
     }
 };
 
